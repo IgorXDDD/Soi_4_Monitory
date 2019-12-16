@@ -33,5 +33,10 @@ public:
         leave();
 	}
 
+	my_monitor()
+	{
+		count=0;
+	}
+
 
 };

@@ -1,12 +1,14 @@
 #include "my_monitor.hpp"
 #include <iostream>
+#include <vector>
 
 
 my_monitor mon;
+list<std::string> chat;
 
 struct msg
 {
-    std::string mes;
+    std::vector<std::string> mes_list;
     int pri;
 };
 
@@ -16,18 +18,26 @@ struct msg
 void *producer(void *args)
 {
     msg tmp=*((msg *)args);
-    
-    while(true)
+    std::string mini_buf;
+
+    //assert(!tmp.mes_list.empty());
+    tmp.mes_list.front() = std::move(tmp.mes_list.back());
+    mini_buf=tmp.mes_list[tmp.mes_list.size()];
+    tmp.mes_list.pop_back();
+
+    while(true && mini_buf!="")
     {
-        mon.buff_enter(tmp.mes,tmp.pri);
+        mon.buff_enter(mini_buf,tmp.pri);
+        mini_buf="";
     }
 }
 
 void * consumer(void *args)
 {
-
-
-
+    while (true)
+    {
+        chat.insert(mon.buff_remove());
+    }
 }
 
 
@@ -36,7 +46,7 @@ int main()
 {
 
 /*
-    list<std::string> test_list("dupa",NORMAL);
+    list<std::string> test_list("1 test nr 1",NORMAL);
     list<std::string> rlist;
 
     test_list.insert("test msg",VIP);
@@ -60,7 +70,18 @@ int main()
         std::cout<<error<<"\n";
     }
     */
-   
+    pthread_t prodA, consA, prodB,consB;
+    msg t1;
+    t1.mes_list.push_back("wiadomosc 1");
+    t1.pri=NORMAL;
+    msg t2;
+    t2.mes_list.push_back("DUPAXXD");
+    t2.pri=NORMAL;
+  pthread_create(&prodA,NULL,producer, &t1);
+  pthread_create(&prodB,NULL,producer, &t2); 
+  pthread_create(&consA,NULL,consumer,NULL);
+  chat.print();
+
     
     
     
