@@ -104,13 +104,13 @@ public:
     {
         if(priority==VIP)
         {
-            std::cout<<"VIP:";
+            std::cout<<"(VIP):";
         }
         else
         {
-            std::cout<<"USER:";
+            std::cout<<"(USER):";
         }
-        std::cout<<"\""<<value<<"\"";
+        std::cout<<value;
         return next;
     }
 

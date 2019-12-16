@@ -1,5 +1,5 @@
 #include "list.hpp"
-#define MAX_BUFER 5
+#define MAX_BUFER 4
 
 
 class my_monitor : Monitor
@@ -12,20 +12,25 @@ private:
 public:
 	node<std::string> *buff_remove() // take a string from buffer
 	{
+		enter();
 		if(count == 0)
 			wait(empty);
 		count--;
 		node<std::string> *tmp=buffer.pop();
-		if(count==MAX_BUFER)
+		if(count==MAX_BUFER-1)
+		{
 			signal(full);
-        leave();
+		}
+		leave();
         return tmp;		
 	}
 
 	void buff_enter(std::string s,int p) // enter value to the buffer
 	{
-        if (count==MAX_BUFER)
+		enter();
+        if (count==MAX_BUFER){
             wait(full);
+		}
         buffer.insert(s,p);
         count++;
         if(count==1)

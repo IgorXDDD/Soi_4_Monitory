@@ -1,90 +1,108 @@
 #include "my_monitor.hpp"
 #include <iostream>
 #include <vector>
+#include <unistd.h> 
+#include <thread>
+#include <list>
+#include <ctime>
+#define SLEEP_TIME 1
 
 
-my_monitor mon;
 list<std::string> chat;
 
 struct msg
 {
-    std::vector<std::string> mes_list;
+    std::string mes;
     int pri;
 };
+my_monitor *mon = new my_monitor();
 
 
-
-
-void *producer(void *args)
+std::string add_time(std::string m, std::string un,int i)
 {
-    msg tmp=*((msg *)args);
-    std::string mini_buf;
-
-    //assert(!tmp.mes_list.empty());
-    tmp.mes_list.front() = std::move(tmp.mes_list.back());
-    mini_buf=tmp.mes_list[tmp.mes_list.size()];
-    tmp.mes_list.pop_back();
-
-    while(true && mini_buf!="")
-    {
-        mon.buff_enter(mini_buf,tmp.pri);
-        mini_buf="";
-    }
+    tm time_sent;
+    time_t t = time(NULL);
+    time_sent = *localtime(&t);
+    m+="nr: [";
+    m+=std::to_string(i);
+    m+="] - ";
+    std::string new_msg;
+    new_msg=  std::to_string(time_sent.tm_hour)+":"+std::to_string(time_sent.tm_min)+":"+std::to_string(time_sent.tm_sec);
+    new_msg+=" ";
+    new_msg+=m;
+    new_msg+=un;
+    new_msg+=".";
+    return new_msg;
 }
 
-void * consumer(void *args)
+
+void *producer(std::string msg_text,int pri,std::string username)
+{
+    int i=1;
+    while(true)
+    {
+        mon->buff_enter(add_time(msg_text,username,i),pri);
+        i++;
+        sleep(1);
+    }
+    return nullptr;
+}
+
+void * consumer()
 {
     while (true)
     {
-        chat.insert(mon.buff_remove());
+        sleep(1);
+        mon->buff_remove()->print();
+        puts("\n");
+        //chat.insert(mon->buff_remove());
     }
+    return nullptr;
 }
 
 
-
-int main()
+int main(int argc,char *argv[])
 {
 
-/*
-    list<std::string> test_list("1 test nr 1",NORMAL);
-    list<std::string> rlist;
-
-    test_list.insert("test msg",VIP);
-    test_list.insert("test msg 1",VIP);
-    test_list.insert("test msg3",NORMAL);
-    test_list.insert("test msg4",VIP);
-    test_list.print();
-    try
+    int vt=6,nt=5;
+    if(argc>1)
     {
-    rlist.insert(test_list.pop());
-    rlist.insert(test_list.pop());
-    rlist.insert(test_list.pop());
-    rlist.insert(test_list.pop());
-    rlist.insert(test_list.pop());
-    std::cout<<"RLIST:\n";
-    rlist.print();
-    rlist.insert(test_list.pop());
+        nt=atoi(argv[1]);
+        vt=atoi(argv[2]);
     }
-    catch(const char* error)
-    {
-        std::cout<<error<<"\n";
-    }
-    */
-    pthread_t prodA, consA, prodB,consB;
-    msg t1;
-    t1.mes_list.push_back("wiadomosc 1");
-    t1.pri=NORMAL;
-    msg t2;
-    t2.mes_list.push_back("DUPAXXD");
-    t2.pri=NORMAL;
-  pthread_create(&prodA,NULL,producer, &t1);
-  pthread_create(&prodB,NULL,producer, &t2); 
-  pthread_create(&consA,NULL,consumer,NULL);
-  chat.print();
 
+
+    std::thread normals[nt];
+    std::thread vips[vt];
+
+    for(int i=0;i<nt;++i)
+    {
+        normals[i]= std::thread(producer,"WIADOMOSC zwykla ",NORMAL," NORMALNY UZYTKOWNIK nr "+std::to_string(i+1));
+    }
+
+    for(int i=0;i<vt;++i)
+    {
+        vips[i]= std::thread(producer,"VIP WIADOMOSC ",VIP," VIPOWY UZYTKOWNIK nr "+std::to_string(i+1));
+        //vips[i].join();
+    }
+
+
+    std::thread reader_thread(consumer);
+    reader_thread.join();
+
+
+
+    for(int i=0;i<nt;++i)
+    {
+        normals[i].join();
+    }
     
+    for(int i=0;i<vt;++i)
+    {
+        vips[i].join();
+    }
     
-    
+
 
     return 0;
 }
