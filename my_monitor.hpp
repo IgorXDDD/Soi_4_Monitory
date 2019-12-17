@@ -14,7 +14,10 @@ public:
 	{
 		enter();
 		if(count == 0)
+		{
+			//std::cout<<"------------Bufor pusty!------------\n";
 			wait(empty);
+		}
 		count--;
 		node<std::string> *tmp=buffer.pop();
 		if(count==MAX_BUFER-1)
@@ -28,7 +31,9 @@ public:
 	void buff_enter(std::string s,int p) // enter value to the buffer
 	{
 		enter();
-        if (count==MAX_BUFER){
+        if (count==MAX_BUFER)
+		{
+			//std::cout<<"------------Bufor pelny!------------\n";
             wait(full);
 		}
         buffer.insert(s,p);

@@ -21,95 +21,31 @@ public:
         next=nullptr;
     }
 
-    node *insert(T tmp,int pri)
+    node *insert_node(T tmp, int pri)
     {
-        node *curr=this;
-        node *inserted = new node<T>(tmp,pri);
-        if(pri==NORMAL)
+        node *new_node=new node<T>(tmp,pri);
+        if(next==nullptr)
         {
-            /*if normal user go to the end of list and make added node its new end*/
-            while(curr->next!=nullptr)
-            {
-                curr=curr->next;
-            }
-            curr->next=inserted;
-            return this;
-        }
-        else // if VIP find the last vip message and insert behind it 
-        {
-            if(curr->priority==NORMAL) // if priority of 1st is normal then vip must be on the beginning
-            {
-                inserted->next=this;
-                return inserted;
-            }
-            else
-            {
-                while (curr->next->priority == VIP)
-                {
-                    curr=curr->next;
-                }
-                inserted->next=curr->next;
-                curr->next=inserted;                
-                return this;
-            }
-        }
-    }
-
-    node *insert(node *t)
-    {
-        node *curr=this;
-        if(this==nullptr)
-        {
-            return t;
-        }
-        if(t==nullptr)
-        {
-            return this;
-        }
-        if(t->priority==NORMAL)
-        {
-            /*if normal user go to the end of list and make added node its new end*/
-            while(curr->next!=nullptr && curr->next!=nullptr)
-            {
-                curr=curr->next;
-            }
-            curr->next=t;
-            return this;
-        }
-        else // if VIP find the last vip message and insert behind it 
-        {
-            if(curr->priority==NORMAL) // if priority of 1st is normal then vip must be on the beginning
-            {
-                t->next=this;
-                return t;
-            }
-            else
-            {
-                if(curr->next==nullptr)
-                {
-                    curr->next=t;
-                    return this;
-                }
-                while (curr->next!=nullptr && curr->next->priority == VIP)
-                {
-                    curr=curr->next;
-                }
-                t->next=curr->next;
-                curr->next=t;                
-                return this;
-            }
-        }
-    }
-    node *print()
-    {
-        if(priority==VIP)
-        {
-            std::cout<<"(VIP):";
+            next=new_node;
         }
         else
         {
-            std::cout<<"(USER):";
+            node *t= next;
+            next=new_node;
+            new_node->next=t;
         }
+        return new_node;
+        
+    }
+    node *insert_to_the_beggining(T tmp, int pri)
+    {
+        node *new_node=new node<T>(tmp,pri);
+        new_node->next=this;
+        return new_node;
+    }
+
+    node *print()
+    {
         std::cout<<value;
         return next;
     }
